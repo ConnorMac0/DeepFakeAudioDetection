@@ -1,3 +1,7 @@
+"""we will import all data here and launch all functionality"""
 import os
-from matplotlib
-"we will import all data here and launch all function"
+from matplotlib import pyplot as plt
+import tensorflow as tf
+import tensorflow_io as tfio
+
+
