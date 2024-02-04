@@ -1,5 +1,3 @@
-"""we will import all data here and launch all functionality"""
-# import tensorflow_io as tfio # for some reason this line isn't working for me
 import os
 import numpy as np
 import pandas as pd
@@ -10,59 +8,56 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.utils import shuffle
 
-DATASET_PATH = "/Users/ethanhyde/Downloads/archive/KAGGLE"  # Change this to your path
-# Insert path here:
+# Change this to your own path to the dataset
+DATASET_PATH = "/Users/ethanhyde/Downloads/archive/KAGGLE"
 
-
-# Constants to hold paths to the dataset
-AUDIO = "/AUDIO"
-LABELS_FILE = os.path.join(DATASET_PATH, "DATASET-balanced.csv")
+AUDIO = "AUDIO"
 REAL_FOLDER = os.path.join(DATASET_PATH, AUDIO, "REAL")
 FAKE_FOLDER = os.path.join(DATASET_PATH, AUDIO, "FAKE")
 
-# Load labels from CSV
-labels_df = pd.read_csv(LABELS_FILE)
+# For testing that the directory is correct
+# print("REAL_FOLDER contents:", os.listdir(REAL_FOLDER))
+# print("FAKE_FOLDER contents:", os.listdir(FAKE_FOLDER))
 
-# Use the index as an identifier, not sure if this is right, may have to look for a better way to do this
-file_paths = [os.path.join(REAL_FOLDER if label == 'REAL' else FAKE_FOLDER, f"{index}.png") for index, label in labels_df[['LABEL']].itertuples(index=True, name=None)]
-class_labels = labels_df['LABEL'].values
+# Dataframe for processing. We can get rid of this if not needed
+# Similar to a spreadsheet layout
+df = pd.DataFrame(columns=['audio_file', 'LABEL'])
 
-# Convert class labels to numerical labels
-label_encoder = LabelEncoder()
-numeric_labels = label_encoder.fit_transform(class_labels)
+# Populate the DataFrame with all files in the 'REAL' folder
+realFiles = [f for f in os.listdir(REAL_FOLDER) if os.path.isfile(os.path.join(REAL_FOLDER, f))]
+dfReal = pd.DataFrame({'audio_file': realFiles, 'LABEL': 'REAL'})
 
-# Function to load and preprocess audio data
-def load_and_preprocess_data(file_paths, numeric_labels):
-    audio_data = []
+# Appending
+df = pd.concat([df, dfReal])
 
-    for file_path in file_paths:
-        # Add code to load and preprocess audio data
-     
+# Populate the DataFrame with all files in the 'FAKE' folder
+fakeFiles = [f for f in os.listdir(FAKE_FOLDER) if os.path.isfile(os.path.join(FAKE_FOLDER, f))]
+dfFake = pd.DataFrame({'audio_file': fakeFiles, 'LABEL': 'FAKE'})
 
-    # Convert the list of audio data to numpy array
-        audio_data = np.array(audio_data)
+# Appending
+df = pd.concat([df, dfFake])
 
-    return audio_data, numeric_labels
-
-# Load and preprocess audio data
-audio_data, numeric_labels = load_and_preprocess_data(file_paths, numeric_labels)
-
-# Split the data into training and testing sets goes here
+# Split the dataset into training and testing sets
+# The 0.2 means that 20% will be used for testing, and the other 80% is used for training
+# 42 is a seed value for RNG
+train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
+print(train_df.columns)
 
 
-# Define the NN model
-model = models.Sequential([
- 
-])
+# For processing audio files. Changing sample rate, getting audio data, etc.
+def process_audio_files(dataframe, outputFolder):
+    for index, row in dataframe.iterrows():
+        audio_file = os.path.join(DATASET_PATH, AUDIO, row['audio_file'])
+        # Code can go here to process the audio file
 
-# Compile the model
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        # Save Processed data to the output folder
+        output_file = os.path.join(outputFolder, f"{row['audio_file']}.npy")
+        # Save the processed data
 
-# Train the model
-#model.fit(X_train, y_train, epochs=5, validation_data=(X_test, y_test))
+        print(f"Processing {audio_file} and saving to {output_file}")
 
-# Evaluate the model
-#test_loss, test_acc = model.evaluate(X_test, y_test)
+# Process real audio files and save to REAL_FOLDER
+process_audio_files(train_df[train_df['LABEL'] == 'REAL'], REAL_FOLDER)
 
-print(f"Test Accuracy: ")
-
+# Process fake audio files and save to FAKE_FOLDER
+process_audio_files(train_df[train_df['LABEL'] == 'FAKE'], FAKE_FOLDER)
