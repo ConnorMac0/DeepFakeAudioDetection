@@ -1,4 +1,4 @@
-"""this file will contain functions that we preprocess audio data before training"""
+"""this file will contain functions that preprocess audio data before training"""
 import tensorflow as tf
 import tensorflow_io as tfio
 from matplotlib import pyplot as plt
@@ -35,7 +35,7 @@ PLotWav - takes input wav and plots it on visual graph
 The resulting graph will be displayed with matplotlib
 """
 def PlotWav(input_wav):
-    # This function can be expanded to sho overlapping waves
+    # This function can be expanded to show overlapping waves
     # and potentially save visual graphs later on
     plt.plot(input_wav)
     plt.show()
