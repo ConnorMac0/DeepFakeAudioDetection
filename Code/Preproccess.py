@@ -1,7 +1,11 @@
 """this file will contain functions that preprocess audio data before training"""
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
 import tensorflow as tf
 import tensorflow_io as tfio
-from matplotlib import pyplot as plt
 
 """
 LoadWav16kMono - converts audio file to 16k hertz wav
@@ -17,12 +21,12 @@ def LoadWav16kMono(filename):
     # Decode wav string
     wav, sample_rate = tf.audio.decode_wav(file_contents, desired_channels=1)
     # Remove trailing axis
-    wav = tf.squeeze(wav, axis=-1)
-    sample_rate = tf.cast(sample_rate, dtype=tf.int64)
+    wav = tf.squeeze(wav, axis=[-1])
+    # sample_rate = tf.cast(sample_rate, dtype=tf.int64)
 
     # Convert to 16000 hertz, used to reduce the size of final audio
     # Depending on the audio files the WILL NEED TO BE FINE TUNED
-    wav = tfio.audio.resample(wav, rate_in=sample_rate, rate_out=16000)
+    # wav = tfio.audio.resample(wav, rate_in=sample_rate, rate_out=16000)
     return wav
 
 
@@ -39,3 +43,15 @@ def PlotWav(input_wav):
     # and potentially save visual graphs later on
     plt.plot(input_wav)
     plt.show()
+
+
+""" MAIN TEST LAUNCH"""
+# Change this to your own path to the dataset
+DATASET_PATH = 'c:/Users/redsl//PycharmProjects/pythonProject8/CS433_Project/KAGGLE/'
+
+REAL_AUDIO = os.path.join(DATASET_PATH, 'AUDIO', 'REAL', 'biden-original.wav')
+
+wave = LoadWav16kMono(REAL_AUDIO)
+
+plt.plot(wave)
+plt.show()
