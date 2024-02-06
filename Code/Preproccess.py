@@ -50,8 +50,11 @@ def PlotWav(input_wav):
 DATASET_PATH = 'c:/Users/redsl//PycharmProjects/pythonProject8/CS433_Project/KAGGLE/'
 
 REAL_AUDIO = os.path.join(DATASET_PATH, 'AUDIO', 'REAL', 'biden-original.wav')
+FAKE_AUDIO = os.path.join(DATASET_PATH, 'AUDIO', 'FAKE', 'biden-to-linus.wav')
 
 wave = LoadWav16kMono(REAL_AUDIO)
+nwave = LoadWav16kMono(FAKE_AUDIO)
 
+plt.plot(nwave)
 plt.plot(wave)
 plt.show()
