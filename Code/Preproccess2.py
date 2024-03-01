@@ -14,7 +14,8 @@ def LoadWav16kMono(filename):
     filename: path to the audio file
     return: waveform sampled at 16k Hz
     """
-    # Load encoded wav file
+    # Loads encoded wav file, and resizes to beginning first seconds (16k Hz)
+    # Change sr=16000 to sr=None to use entire .wav file
     wav, sample_rate = librosa.load(filename, sr=16000, mono=True)
     return wav, sample_rate
 
@@ -31,11 +32,16 @@ def preprocess(file_path, label):
     file_path: path to the audio file
     label: label associated with the audio file
     returns: spectrogram and label
+
+    This is only for displaying a spectrogram
     """
+    # Loads wav data
     wav = LoadWav16kMono(file_path)
+    # adds zero padding for missing/empty files that are smaller than 48000
     wav = wav[:48000]
     zero_padding = tf.zeros([48000] - tf.shape(wav), dtype=tf.float32)
     wav = tf.concat([zero_padding, wav], 0)
+    # Converts to spectrogram
     spectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
     spectrogram = tf.abs(spectrogram)
     spectrogram = tf.expand_dims(spectrogram, axis=2)
@@ -65,17 +71,34 @@ def extract_features(wav, sample_rate, label):
 
     return features
 
-def process_audio_folder(folder_path, label):
+def process_audio_folder(folder_path, label, segment_duration=10, overlap=0.5):
+    """
+    Process all audio files in a folder.
+
+    Parameters:
+        folder_path (str): Path to the folder containing audio files.
+        label (str): Label to assign to the audio files in this folder.
+
+    Returns:
+        list: List of extracted features from all audio files in the folder.
+    """
     # Initialize an empty list to store features and labels
     data = []
 
     # Iterate through audio files in the folder
     for filename in os.listdir(folder_path):
         if filename.endswith('.wav'):
+            # Get file path to a .wav file
             file_path = os.path.join(folder_path, filename)
+            # loads the .wav data
             wav, sample_rate = LoadWav16kMono(file_path)
-            features = extract_features(wav, sample_rate, label)
-            data.append(features)
+            segment_length = int(segment_duration * sample_rate)
+            hop_length = int(segment_length * (1 - overlap))
+            # Split audio into segments
+            for i in range(0, len(wav) - segment_length + 1, hop_length):
+                wav_segment = wav[i:i + segment_length]
+                features = extract_features(wav_segment, sample_rate, label)
+                data.append(features)
 
     return data
 
@@ -88,11 +111,11 @@ FAKE_AUDIO = os.path.join(DATASET_PATH, 'AUDIO', 'FAKE')
 all_data = []
 
 # preprocess all real audio
-folder_data = process_audio_folder(REAL_AUDIO, 'label1')
+folder_data = process_audio_folder(REAL_AUDIO, 'REAL')
 all_data.extend(folder_data)
 
 # preprocess all fake audio
-folder_data = process_audio_folder(FAKE_AUDIO, 'label2')
+folder_data = process_audio_folder(FAKE_AUDIO, 'FAKE')
 all_data.extend(folder_data)
 
 # Convert data to DataFrame
