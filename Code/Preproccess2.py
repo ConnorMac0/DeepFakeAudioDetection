@@ -16,7 +16,7 @@ def LoadWav16kMono(filename):
     """
     # Loads encoded wav file, and resizes to beginning first seconds (16k Hz)
     # Change sr=16000 to sr=None to use entire .wav file
-    wav, sample_rate = librosa.load(filename, sr=48000, mono=True)
+    wav, sample_rate = librosa.load(filename, sr=None, mono=True)
     return wav, sample_rate
 
 def PlotWav(input_wav):
@@ -124,7 +124,7 @@ columns = ['chroma_stft', 'rms', 'spectral_centroid', 'spectral_bandwidth',
 df = pd.DataFrame(all_data, columns=columns)
 
 # Save DataFrame to CSV
-df.to_csv('audio_features3.csv', index=False)
+df.to_csv('audio_features5.csv', index=False)
 
 # REAL_AUDIO = os.path.join(DATASET_PATH, 'AUDIO', 'REAL', 'biden-original.wav')
 # FAKE_AUDIO = os.path.join(DATASET_PATH, 'AUDIO', 'FAKE', 'biden-to-linus.wav')
