@@ -62,32 +62,63 @@ const About = ({ handleHomeClick }) => (
 
 
 
-const Upload = ({ handleHomeClick }) => (
-  <Container>
-    <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Upload
-        </Typography>
-        <Button color="inherit" component={Link} to="/" onClick={handleHomeClick}>Home</Button>
-      </Toolbar>
-    </AppBar>
-    <div>
-      <h1 className='font'>File upload</h1>
-      <body>
-        <p>
-          Choose an audio file to upload
-        </p>
-      </body>
-    </div>
+const Upload = ({ handleHomeClick }) => {
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     
-    <form>
-      <input type="file" />
-      <button type="submit">Upload</button>
-    </form>
- 
-  </Container>
-);
+    if (!selectedFile) {
+      console.log('No file selected.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('audioFile', selectedFile);
+
+    try {
+      const response = await fetch('http://localhost:5000/upload', { // Replace with your Flask server URL
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        console.log('File uploaded successfully.');
+        // Handle success as needed
+      } else {
+        console.error('Failed to upload file:', response.statusText);
+        // Handle error response
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+  };
+
+  return (
+    <Container>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Upload
+          </Typography>
+          <Button color="inherit" onClick={handleHomeClick}>Home</Button>
+        </Toolbar>
+      </AppBar>
+      <div>
+        <h1 className='font'>File upload</h1>
+        <form onSubmit={handleSubmit} encType="multipart/form-data"> {/* Add encType */}
+          <input type="file" onChange={handleFileChange} />
+          <button type="submit">Upload</button>
+        </form>
+      </div>
+    </Container>
+  );
+};
+
 
 const Header = () => {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
