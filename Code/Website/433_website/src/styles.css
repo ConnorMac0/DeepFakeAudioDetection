@@ -1,0 +1,29 @@
+.container {
+    text-align: center; /* Center the text */
+    margin-bottom: 20px; /* Add margin-bottom to create space between heading and content */
+  }
+  
+  .content {
+    width: 60%;
+    margin: 0 auto;
+    padding: 10px;
+    text-align: center; /* Center the text */
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px; /* Adjust padding as needed */
+    text-align: left; /* Adjust text alignment as needed */
+  }
+
+  .aboutPage {
+    background-image: linear-gradient(red, yellow);
+  }
+
+  .font {
+    font-family: 'header-font', Roboto;
+    font-weight: bold;
+  }
