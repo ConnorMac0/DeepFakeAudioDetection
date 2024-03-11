@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 import joblib
+import pickle
 import tensorflow as tf
 import librosa.feature
 import pandas as pd
+import numpy as np
 
 # app = Flask(__name__)
 
@@ -16,12 +18,17 @@ app = Flask(__name__)
 CORS(app)
 
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'mp3'}
+ALLOWED_EXTENSIONS = {'mp3', 'wav'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 #model = joblib.load('DeepVoiceModel.pkl')
+
+model_file = 'DeepVoiceModel.pkl'
+# load model from pickle file
+with open(model_file, 'rb') as file:  
+    model = pickle.load(file)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -83,7 +90,10 @@ def process_audio(file_path, segment_duration=10, overlap=0.5):
     for i in range(0, len(wav) - segment_length + 1, hop_length):
         wav_segment = wav[i:i + segment_length]
         features = extract_features(wav_segment, sample_rate)
+        for f in range(len(features)):
+            features[f] = abs(features[f])
         data.append(features)
+
 
     return data
 
@@ -99,20 +109,19 @@ def upload_file():
 
     if file and allowed_file(file.filename):
         filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        #file.save(filename)
+        file.save(filename)
 
         # Preprocess the uploaded file
         processed_data = process_audio(filename)
 
-        # Convert data to DataFrame
-        columns = ['chroma_stft', 'rms', 'spectral_centroid', 'spectral_bandwidth',
-                'rolloff', 'zero_crossing_rate'] + [f'mfcc{i}' for i in range(1, 21)]
-        df = pd.DataFrame(processed_data, columns=columns)
+        predicted = model.predict(np.array(processed_data))
+        predicted = tf.squeeze(predicted)
+        predicted = [1 if x >= 0.5 else 0 for x in predicted]
 
-        # Pass the preprocessed data to the trained model
-        #result = model.predict(processed_data)
-
-        return jsonify({'result': df.to_json()}), 200
+        if predicted.count(1) >= predicted.count(0):
+            return jsonify({'result': "No Deep Fake Voice Detected"}), 200
+        else:
+            return jsonify({'result': "Deep Fake Voice Detected"}), 200
     else:
         return jsonify({'error': 'Invalid file format'}), 400
 
