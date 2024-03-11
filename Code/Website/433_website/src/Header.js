@@ -87,6 +87,7 @@ const Upload = ({ handleHomeClick }) => {
       });
 
       if (response.ok) {
+        console.log(response.json())
         console.log('File uploaded successfully.');
         // Handle success as needed
       } else {
