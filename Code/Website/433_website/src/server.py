@@ -1,19 +1,13 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-import joblib
 import pickle
 import tensorflow as tf
 import librosa.feature
 import pandas as pd
 import numpy as np
 
-# app = Flask(__name__)
-
-# @app.route("/members")
-# def members():
-#     return {"members":["Member1", "Member2", "Member3"]}
-
+# Initialize flask server
 app = Flask(__name__)
 CORS(app)
 
@@ -23,9 +17,8 @@ ALLOWED_EXTENSIONS = {'mp3', 'wav'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-#model = joblib.load('DeepVoiceModel.pkl')
-
 model_file = 'DeepVoiceModel.pkl'
+
 # load model from pickle file
 with open(model_file, 'rb') as file:  
     model = pickle.load(file)
@@ -64,7 +57,6 @@ def extract_features(wav, sample_rate):
         zero_crossing_rate.mean(),
     ]
     features.extend(mfcc.mean(axis=1))
-    #features.append(label)  # Append label
 
     return features
 
@@ -97,6 +89,7 @@ def process_audio(file_path, segment_duration=10, overlap=0.5):
 
     return data
 
+# API route for file upload
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'audioFile' not in request.files:

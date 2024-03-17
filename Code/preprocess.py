@@ -124,18 +124,4 @@ columns = ['chroma_stft', 'rms', 'spectral_centroid', 'spectral_bandwidth',
 df = pd.DataFrame(all_data, columns=columns)
 
 # Save DataFrame to CSV
-df.to_csv('audio_features5.csv', index=False)
-
-# REAL_AUDIO = os.path.join(DATASET_PATH, 'AUDIO', 'REAL', 'biden-original.wav')
-# FAKE_AUDIO = os.path.join(DATASET_PATH, 'AUDIO', 'FAKE', 'biden-to-linus.wav')
-
-# wave = LoadWav16kMono(REAL_AUDIO)
-# nwave = LoadWav16kMono(FAKE_AUDIO)
-# plt.plot(nwave)
-# plt.plot(wave)
-# plt.show()
-
-# spectro, label = preprocess(REAL_AUDIO, 0.0)
-# plt.figure(figsize=(10, 5))
-# plt.imshow(tf.transpose(spectro)[0])
-# plt.show()
+#df.to_csv('', index=False)
